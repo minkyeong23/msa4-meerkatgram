@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 public class Post {
     private Long id;
-    private Long user_id;
+    private Long userId;
     private String content;
     private String image;
     private String createAt;
