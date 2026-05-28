@@ -24,7 +24,7 @@ public class JwtProvider {
     }
 
     public String generateRefreshToken(User user) {
-        return this.generateToken(user, jwtConfig.accessTokenExpiry());
+        return this.generateToken(user, jwtConfig.refreshTokenExpiry());
     }
 
     private String generateToken(User user, long ttl) {
