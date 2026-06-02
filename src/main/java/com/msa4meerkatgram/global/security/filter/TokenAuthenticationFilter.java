@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,7 +25,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     // 엑세스 토큰의 유효 여부를 확인하고, 인증 정보를 스프링 시큐리티에 설정하는 메소드
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         // 헤더에서 액세스 토큰
         Optional<String> tokenOptional = jwtProvider.extractAccessToken(request);
 
