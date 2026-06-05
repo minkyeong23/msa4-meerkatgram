@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<GlobalRes<String>> authenticationHandle(AuthenticationException e)  {
+    public ResponseEntity<GlobalRes<String>> authenticationHandle(AuthenticationException e) {
         return ResponseEntity.status(401).body(
             GlobalRes.<String>builder()
                 .code("E02")
@@ -42,7 +43,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<GlobalRes<String>> accessDeniedHandle(AccessDeniedException e)  {
+    public ResponseEntity<GlobalRes<String>> accessDeniedHandle(AccessDeniedException e) {
         return ResponseEntity.status(403).body(
             GlobalRes.<String>builder()
                 .code("E03")
@@ -118,7 +119,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(FileManagedException.class)
     public ResponseEntity<GlobalRes<String>> fileManagedHandle(InvalidTokenException e) {
-        log.error("파일 업로드 에러: {}\n{}",e.getMessage(),Arrays.toString(e.getStackTrace()));
+        log.error("파일 업로드 에러: {}\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
         return ResponseEntity.status(500).body(
             GlobalRes.<String>builder()
                 .code("E40")
@@ -128,9 +129,21 @@ public class GlobalExceptionHandler {
         );
     }
 
-        @ExceptionHandler(Exception.class)
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<GlobalRes<String>> sqlHandle(Exception e) {
+        log.error("DB 에러", e);
+        return ResponseEntity.status(500).body(
+            GlobalRes.<String>builder()
+                .code("E80")
+                .message("DB 에러")
+                .data("현재 서비스 이용이 불가합니다. 잠시후 다시 시도해 주십시오.")
+                .build()
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<GlobalRes<String>> othersHandle(Exception e) {
-        log.error("시스템 에러: {}\n{}",e.getMessage(),Arrays.toString(e.getStackTrace()));
+        log.error("시스템 에러", e);
         return ResponseEntity.status(500).body(
             GlobalRes.<String>builder()
                 .code("E99")

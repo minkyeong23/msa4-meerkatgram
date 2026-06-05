@@ -38,7 +38,15 @@
     WHERE
             deleted_at IS NULL
         AND id = #{id}
-
-
     </select>
+
+    <select id="countPostsByUserId" resultType="long">
+        SELECT
+            COUNT(*)
+        FROM posts
+        WHERE
+            deleted_at IS NULL
+        AND user_id = #{userId}
+    </select>
+
 </mapper>
