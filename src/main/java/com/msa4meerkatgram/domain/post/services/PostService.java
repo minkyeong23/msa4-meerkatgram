@@ -1,6 +1,6 @@
 package com.msa4meerkatgram.domain.post.services;
 
-import com.msa4meerkatgram.domain.post.entities.Post;
+import com.msa4meerkatgram.domain.post.entities.PostMybatis;
 import com.msa4meerkatgram.domain.post.mapper.PostMapper;
 import com.msa4meerkatgram.domain.post.requests.PostCreateReq;
 import com.msa4meerkatgram.domain.post.requests.PostIndexReq;
@@ -20,7 +20,7 @@ public class PostService {
         int offset = (postIndexReq.page() - 1) * postIndexReq.limit();
 
         // 특정 페이지 게시글 조회
-        List<Post> posts = postMapper.getPagination(postIndexReq.limit(), offset);
+        List<PostMybatis> posts = postMapper.getPagination(postIndexReq.limit(), offset);
 
         // 토탈 획득
         long total = postMapper.getTotal();
@@ -35,8 +35,8 @@ public class PostService {
 
     }
 
-    public Post show(long id) {
-        Post post = postMapper.findByPk(id);
+    public PostMybatis show(long id) {
+        PostMybatis post = postMapper.findByPk(id);
 
         if(post == null) {
             throw new DeletedRecordException("이미 삭제된 게시글입니다.");
@@ -46,7 +46,7 @@ public class PostService {
     }
 
     public long create(PostCreateReq req, long loginUserId) {
-        Post post = new Post();
+        PostMybatis post = new PostMybatis();
         post.setContent(req.text());
         post.setImage(req.img());
 
