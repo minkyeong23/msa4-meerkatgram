@@ -1,10 +1,9 @@
 package com.msa4meerkatgram.domain.post.services;
 
-import com.msa4meerkatgram.domain.post.entities.PostMybatis;
-import com.msa4meerkatgram.domain.post.mapper.PostMapper;
+import com.msa4meerkatgram.domain.post.entities.Post;
+import com.msa4meerkatgram.domain.post.repositories.PostRepository;
 import com.msa4meerkatgram.domain.post.requests.PostCreateReq;
-import com.msa4meerkatgram.domain.post.requests.PostIndexReq;
-import com.msa4meerkatgram.domain.post.requests.PostIndexRes;
+import com.msa4meerkatgram.domain.post.response.PostWithUserRes;
 import com.msa4meerkatgram.global.errors.custom.DeletedRecordException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,45 +13,41 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-    private final PostMapper postMapper;
 
-    public PostIndexRes index(PostIndexReq postIndexReq) {
-        int offset = (postIndexReq.page() - 1) * postIndexReq.limit();
+    private final PostRepository postRepository;
 
-        // 특정 페이지 게시글 조회
-        List<PostMybatis> posts = postMapper.getPagination(postIndexReq.limit(), offset);
+    // public PostIndexRes index(PostIndexReq postIndexReq) {
+    //     int page = postIndexReq.page() - 1;
+    //
+    //     Page<Post> postPage = postRepository.findAll(
+    //             PageRequest.of(page, postIndexReq.limit())
+    //     );
+    //
+    //     return PostIndexRes.builder()
+    //             .total(postPage.getTotalElements())
+    //             .lastPage(postPage.isLast())
+    //             .posts(postPage.getContent())
+    //             .build();
+    // }
 
-        // 토탈 획득
-        long total = postMapper.getTotal();
-        boolean lastPage = offset + postIndexReq.limit() >=  total;
+    public PostWithUserRes show(long id) {
 
-        // 컨트롤러 전달
-        return PostIndexRes.builder()
-            .total(total)
-            .lastPage(lastPage)
-            .posts(posts)
-            .build();
+        Post result = postRepository.findById(id)
+                .orElseThrow(() ->
+                        new DeletedRecordException("이미 삭제된 게시글입니다."));
 
+        return PostWithUserRes.from(result);
     }
 
-    public PostMybatis show(long id) {
-        PostMybatis post = postMapper.findByPk(id);
+    public Long create(PostCreateReq req, Long loginUserId) {
 
-        if(post == null) {
-            throw new DeletedRecordException("이미 삭제된 게시글입니다.");
-        }
+        Post post = new Post();
 
-        return post;
-    }
-
-    public long create(PostCreateReq req, long loginUserId) {
-        PostMybatis post = new PostMybatis();
         post.setContent(req.text());
         post.setImage(req.img());
 
-        post.setUserId(loginUserId);
+        Post savedPost = postRepository.save(post);
 
-        postMapper.insert(post);
-        return post.getId();
+        return savedPost.getId();
     }
 }

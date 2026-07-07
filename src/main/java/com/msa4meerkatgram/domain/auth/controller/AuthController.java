@@ -68,18 +68,4 @@ public class AuthController {
         );
     }
 
-    @PostMapping("/registration")
-    public ResponseEntity<GlobalRes<String>> registration(
-        @Valid @RequestBody RegistrationReq registrationReq
-        ) {
-        authService.registration(registrationReq);
-
-        return ResponseEntity.status(200).body(
-            GlobalRes.<String>builder()
-                .code("00")
-                .message("회원가입 완료")
-                .build()
-        );
-    }
-
 }
