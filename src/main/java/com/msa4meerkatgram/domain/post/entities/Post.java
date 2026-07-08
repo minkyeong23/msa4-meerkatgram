@@ -13,17 +13,21 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity // 해당 클래스가 JPA 엔티티임을 선언
-@EntityListeners(AuditingEntityListener.class) // 엔티티의 이벤트 리스너 지정
+@EntityListeners(AuditingEntityListener.class) // 엔티티의 이벤트 리스너 지정, 개별 엔티티 클래스 위에 붙어서 "이 엔티티가 저장되거나 수정될 때 시간을 감시하겠다"라고 알려주는 역할
 @Table(name = "posts") // 테이블명 맵핑
-@SQLDelete(sql = "UPDATE posts SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE posts SET deleted_at = NOW() where id = ?") // Soft delete 활성화
 @SQLRestriction("deleted_at IS NULL") // 엔티티의 조회 시 항상 특정 조건을 추가하도록 지정
 @Getter
 @Setter
 public class Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // PK 자동 생성 전략 설정
-    @Column(name = "id", columnDefinition = "BIGINT UNSIGNED")
+    @Id // PK 지정
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // PK 자동 생성 전략 (strategy : AUTO, IDENTITY, SEQUENCE, TABLE)
+    @Column(name = "id")
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY) // "현재 엔티티(Many)가 User 엔티티(One)를 참조한다"는 N:1 관계를 선언
+    @JoinColumn(name = "user_id", insertable = true, updatable = false, nullable = false)
+    private User user;
 
     @Column(name = "content", nullable = false, length = 200)
     private String content;
@@ -41,14 +45,4 @@ public class Post {
 
     @Column(name = "deleted_at", nullable = true)
     private LocalDateTime deletedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "user_id"
-            , insertable = true // INSERT할 때, user 객체에 어떤 값을 넣더라도, INSERT문에 `user_id`컬럼을 포함하겠다.
-            , updatable = false // UPDATE할 때, user 객체에 어떤 값을 넣더라도, UPDATE문에 `user_id`컬럼을 포함하지 않겠다.
-            , nullable = false
-            , foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT) // 물리적 FK 생성하고 싶지않을 때
-    )
-    private User user;
 }

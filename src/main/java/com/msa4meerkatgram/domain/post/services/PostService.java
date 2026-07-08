@@ -1,8 +1,11 @@
 package com.msa4meerkatgram.domain.post.services;
 
 import com.msa4meerkatgram.domain.post.entities.Post;
+import com.msa4meerkatgram.domain.post.repositories.PostQueryRepository;
 import com.msa4meerkatgram.domain.post.repositories.PostRepository;
 import com.msa4meerkatgram.domain.post.requests.PostCreateReq;
+import com.msa4meerkatgram.domain.post.requests.PostIndexReq;
+import com.msa4meerkatgram.domain.post.response.PostIndexRes;
 import com.msa4meerkatgram.domain.post.response.PostWithUserRes;
 import com.msa4meerkatgram.global.errors.custom.DeletedRecordException;
 import lombok.RequiredArgsConstructor;
@@ -15,20 +18,21 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostQueryRepository postQueryRepository;
 
-    // public PostIndexRes index(PostIndexReq postIndexReq) {
-    //     int page = postIndexReq.page() - 1;
-    //
-    //     Page<Post> postPage = postRepository.findAll(
-    //             PageRequest.of(page, postIndexReq.limit())
-    //     );
-    //
-    //     return PostIndexRes.builder()
-    //             .total(postPage.getTotalElements())
-    //             .lastPage(postPage.isLast())
-    //             .posts(postPage.getContent())
-    //             .build();
-    // }
+    public PostIndexRes index(PostIndexReq postIndexReq) {
+        int offset = (postIndexReq.page() - 1) * postIndexReq.limit();
+
+        // 특정 페이지 게시글 조회
+        List<Post> result = postQueryRepository.pagination(offset, postIndexReq.limit());
+
+        // 토탈 획득
+        long total = postRepository.count();
+        boolean lastPage = offset + postIndexReq.limit() >= total;
+
+        // 컨트롤러 전달
+        return PostIndexRes.from(total, lastPage, result);
+    }
 
     public PostWithUserRes show(long id) {
 
