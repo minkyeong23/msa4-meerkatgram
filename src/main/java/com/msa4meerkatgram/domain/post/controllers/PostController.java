@@ -6,10 +6,14 @@ import com.msa4meerkatgram.domain.post.requests.PostIndexReq;
 import com.msa4meerkatgram.domain.post.response.PostIndexRes;
 import com.msa4meerkatgram.domain.post.response.PostWithUserRes;
 import com.msa4meerkatgram.domain.post.services.PostService;
+import com.msa4meerkatgram.global.annotations.openapi.ApiNotValidErrorResponse;
 import com.msa4meerkatgram.global.errors.custom.InvalidTokenException;
 import com.msa4meerkatgram.global.responses.GlobalRes;
 import com.msa4meerkatgram.global.security.jwt.JwtProvider;
 import io.jsonwebtoken.Claims;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -18,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "게시글 관련 API", description = "게시글 관련")
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -26,6 +31,8 @@ public class PostController {
     private final PostService postService;
     private final JwtProvider jwtProvider;
 
+    @ApiResponse(responseCode = "200", description = "게시글 목록 획득 성공")
+    @ApiNotValidErrorResponse
     @GetMapping("/posts")
     public ResponseEntity<GlobalRes<PostIndexRes>> index(PostIndexReq postIndexReq) {
         PostIndexRes postIndexRes = postService.index(postIndexReq);
@@ -41,8 +48,7 @@ public class PostController {
 
     @GetMapping("/posts/{id}")
     public ResponseEntity<GlobalRes<PostWithUserRes>> show(
-            @PathVariable
-            @Min(value = 1, message = "1이상 숫자만 허용합니다.")
+            @Parameter(description = "게시글 번호", example = "1") @Min(value = 1, message = "1이상 숫자만 허용합니다.")
             long id
     ) {
 
