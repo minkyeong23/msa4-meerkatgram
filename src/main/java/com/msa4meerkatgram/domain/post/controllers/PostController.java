@@ -35,15 +35,7 @@ public class PostController {
     @ApiNotValidErrorResponse
     @GetMapping("/posts")
     public ResponseEntity<GlobalRes<PostIndexRes>> index(PostIndexReq postIndexReq) {
-        PostIndexRes postIndexRes = postService.index(postIndexReq);
-
-        return ResponseEntity.status(200).body(
-            GlobalRes.<PostIndexRes>builder()
-                .code("00")
-                .message("정상처리")
-                .data(postIndexRes)
-                .build()
-        );
+        return ResponseEntity.ok(GlobalRes.success(postService.index(postIndexReq)));
     }
 
     @GetMapping("/posts/{id}")
@@ -51,39 +43,30 @@ public class PostController {
             @Parameter(description = "게시글 번호", example = "1") @Min(value = 1, message = "1이상 숫자만 허용합니다.")
             long id
     ) {
-
-        PostWithUserRes result = postService.show(id);
-
-        return ResponseEntity.ok(
-                GlobalRes.<PostWithUserRes>builder()
-                        .code("00")
-                        .message("게시글 상세 정상 처리")
-                        .data(result)
-                        .build()
-        );
+        return ResponseEntity.ok(GlobalRes.success(postService.show(id)));
     }
 
-    @PostMapping("/posts")
-    public ResponseEntity<GlobalRes<PostCreateRes>> create(
-            @Valid @RequestBody PostCreateReq postCreateReq,
-            HttpServletRequest request
-    ) {
-
-        String token = jwtProvider.extractAccessToken(request)
-                .orElseThrow(() ->
-                        new InvalidTokenException("인증 토큰이 누락되었거나 유효하지 않습니다."));
-
-        Claims claims = jwtProvider.extractClaims(token);
-        Long loginUserId = Long.parseLong(claims.getSubject());
-
-        Long postId = postService.create(postCreateReq, loginUserId);
-
-        return ResponseEntity.status(201).body(
-                GlobalRes.<PostCreateRes>builder()
-                        .code("00")
-                        .message("게시글 작성 성공")
-                        .data(new PostCreateRes(postId))
-                        .build()
-        );
-    }
+//    @PostMapping("/posts")
+//    public ResponseEntity<GlobalRes<PostCreateRes>> create(
+//            @Valid @RequestBody PostCreateReq postCreateReq,
+//            HttpServletRequest request
+//    ) {
+//
+//        String token = jwtProvider.extractAccessToken(request)
+//                .orElseThrow(() ->
+//                        new InvalidTokenException("인증 토큰이 누락되었거나 유효하지 않습니다."));
+//
+//        Claims claims = jwtProvider.extractClaims(token);
+//        Long loginUserId = Long.parseLong(claims.getSubject());
+//
+//        Long postId = postService.create(postCreateReq, loginUserId);
+//
+//        return ResponseEntity.status(201).body(
+//                GlobalRes.<PostCreateRes>builder()
+//                        .code("00")
+//                        .message("게시글 작성 성공")
+//                        .data(new PostCreateRes(postId))
+//                        .build()
+//        );
+//    }
 }
